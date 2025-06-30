@@ -10,17 +10,18 @@ source:
   sha256: 1f45c0bcb58b6f332f37c637632247c9b02bc6af0fdceb7ba7ce8d2ebbfb0926
 
 build:
+  skip: True  # [py<37]
   noarch: python
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  number: 1
+  number: 0
 
 requirements:
   host:
-    - python {{ python_min }}
+    - python
     - poetry-core >=1.0.0
     - pip
   run:
-    - python >={{ python_min }},<4.0.0
+    - python
     - grpcio >=1.49.1,<2.0.0
   run_constrained:
     - protobuf >=4.21.9
@@ -30,9 +31,10 @@ test:
     - grpc_interceptor
   commands:
     - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
   requires:
     - pip
-    - python {{ python_min }}
+    - python
 
 about:
   home: https://github.com/d5h-foss/grpc-interceptor
