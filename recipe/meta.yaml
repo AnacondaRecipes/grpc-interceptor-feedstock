@@ -28,7 +28,7 @@ requirements:
 test:
   source_files:
     - tests
-  import:
+  imports:
     - grpc_interceptor
     - grpc_interceptor.testing
     - grpc_interceptor.testing.protos
