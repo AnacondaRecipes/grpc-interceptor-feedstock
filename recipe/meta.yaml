@@ -6,40 +6,67 @@ package:
   version: {{ version }}
 
 source:
-  url: https://pypi.org/packages/source/{{ name[0] }}/{{ name }}/grpc-interceptor-{{ version }}.tar.gz
-  sha256: 1f45c0bcb58b6f332f37c637632247c9b02bc6af0fdceb7ba7ce8d2ebbfb0926
+  url: https://github.com/d5h-foss/{{ name }}/archive/refs/tags/v{{ version }}.tar.gz
+  sha256: 382a2a1a18e40929f2ef635c06f16e32e6c2927293484368114cf1fd14aaa81a
 
 build:
-  noarch: python
+  skip: True  # [py<37]
   script: {{ PYTHON }} -m pip install . -vv --no-deps --no-build-isolation
-  number: 1
+  number: 0
 
 requirements:
   host:
-    - python {{ python_min }}
-    - poetry-core >=1.0.0
+    - python
     - pip
+    - poetry-core >=1.0.0
+    - setuptools
   run:
-    - python >={{ python_min }},<4.0.0
+    - python
     - grpcio >=1.49.1,<2.0.0
   run_constrained:
     - protobuf >=4.21.9
 
 test:
+  source_files:
+    - tests
   imports:
     - grpc_interceptor
+    - grpc_interceptor.testing
+    - grpc_interceptor.testing.protos
   commands:
     - pip check
+    - python -c "from importlib.metadata import version; assert(version('{{ name }}')=='{{ version }}')"
+    - pytest -vv tests
   requires:
     - pip
-    - python {{ python_min }}
+    - python
+    - pytest
+    - protobuf >=4.21.9
+    - pytest-asyncio >=0.19.0
 
 about:
   home: https://github.com/d5h-foss/grpc-interceptor
-  summary: Simplifies gRPC interceptors
   license: MIT
   license_family: MIT
   license_file: LICENSE
+  summary: Simplifies gRPC interceptors
+  description: |
+    The primary aim of this project is to make Python gRPC interceptors simple.
+    The Python grpc package provides service interceptors, but they're a bit
+    hard to use because of their flexibility. The grpc interceptors don't have
+    direct access to the request and response objects, or the service context.
+    Access to these are often desired, to be able to log data in the request or
+    response, or set status codes on the context.
+
+    The secondary aim of this project is to keep the code small and simple.
+    Code you can read through and understand quickly gives you confidence and
+    helps debug issues. When you install this package, you also don't want a
+    bunch of other packages that might cause conflicts within your project.
+    Too many dependencies slow down installation as well as runtime (fresh
+    imports take time). Hence, a goal of this project is to keep dependencies
+    to a minimum. The only core dependency is the grpc package, and the testing
+    extra includes protobuf as well.
+  doc_url: https://grpc-interceptor.readthedocs.io/en/latest/index.html
   dev_url: https://github.com/d5h-foss/grpc-interceptor
 
 extra:
